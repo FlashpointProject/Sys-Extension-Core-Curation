@@ -1,0 +1,35 @@
+{
+  "name": "core-curation",
+  "displayName": "Core Curation",
+  "description": "Required for curating in Flashpoint Core",
+  "version": "0.0.1",
+  "main": "./dist/extension.js",
+  "contributes": {
+    "contextButtons": [
+      {
+        "context": "curation",
+        "name": "Fix FP Nav Requirements",
+        "command": "core-curation.fix-requirements"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "webpack --mode development",
+    "watch": "webpack --watch --mode development",
+    "package": "gulp",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.21.0",
+    "@typescript-eslint/parser": "^5.21.0",
+    "eslint": "^8.14.0",
+    "gulp": "^4.0.2",
+    "gulp-zip": "^5.0.2",
+    "merge-stream": "^2.0.0",
+    "ts-loader": "^9.2.8",
+    "typescript": "^4.6.4",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
+  }
+}
