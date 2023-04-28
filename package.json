@@ -8,8 +8,18 @@
     "contextButtons": [
       {
         "context": "curation",
-        "name": "Fix FP Nav Requirements",
+        "name": "Migrate to FP Navigator",
         "command": "core-curation.fix-requirements"
+      },
+      {
+        "context": "curation",
+        "name": "Load Data Pack Into Curation",
+        "command": "core-curation.load-data-pack"
+      }, {
+        "context": "curation",
+        "runWithNoCuration": true,
+        "name": "Migrate Data Packs",
+        "command": "core-curation.migrate-data-packs"
       }
     ]
   },

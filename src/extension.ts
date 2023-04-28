@@ -1,6 +1,7 @@
 import * as flashpoint from 'flashpoint-launcher';
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
+import * as os from 'os';
 
 const html5paths = [
 	'FPSoftware\\fpnavigator-portable\\FPNavigator.exe',
@@ -8,6 +9,80 @@ const html5paths = [
 ];
 
 export function activate(context: flashpoint.ExtensionContext) {
+	flashpoint.registerDisposable(
+		context.subscriptions,
+		flashpoint.commands.registerCommand('core-curation.migrate-data-packs', async () => {
+			const handle = await flashpoint.dialogs.showMessageBoxWithHandle({
+				largeMessage: true,
+				message: 'Migrating data packs...',
+				buttons: []
+			});
+			try {
+				const allCursPath = path.join(flashpoint.config.flashpointPath, 'Curations');
+				const selectedFiles = await flashpoint.dialogs.showOpenDialog({
+					filters: [],
+					properties: ['multiSelections'],
+					title: 'Migrate Data Packs'
+				});
+				if (selectedFiles) {
+					for (const file of selectedFiles) {
+						const fileName = path.basename(file);
+						if (fileName.length === 40 && fileName.endsWith(".zip")) {
+							const gameId = fileName.substring(0, 36);
+							// Make the curation
+							const folder = await flashpoint.curations.makeCurationFromGame(gameId, true);
+							flashpoint.log.debug('copying for ' + folder);
+							if (folder) {
+								// Extract data pack
+								const curationPath = flashpoint.curations.getCurationPath(folder);
+								const tempPath = fs.mkdtempSync(path.join(os.tmpdir(), 'unpack-data_'));
+								await flashpoint.unzipFile(file, tempPath);
+								flashpoint.log.debug(tempPath);
+								const srcContents = path.join(tempPath, 'content');
+								const destContents = path.join(curationPath, 'content');
+								await fs.copy(srcContents, destContents);
+								await flashpoint.curations.refreshCurationContent(folder);
+							} else {
+								flashpoint.log.error('Failed to create curation from game?');
+							}
+						}
+					}
+				}
+			} catch (err) { 
+				flashpoint.log.error(`Failed to migrate data packs: ${err}`);
+			} finally {
+				flashpoint.dialogs.cancelDialog(handle);
+			}
+		})
+	);
+
+	flashpoint.registerDisposable(
+		context.subscriptions,
+		flashpoint.commands.registerCommand('core-curation.load-data-pack', async (curation: flashpoint.CurationState | null, selected: string[]) => {
+			try {
+				if (selected.length > 0) {
+					// Unpack selected data pack
+					const curationPath = flashpoint.curations.getCurationPath(selected[0]);
+					const selectedFile = await flashpoint.dialogs.showOpenDialog({
+						filters: [],
+						title: 'Open Data Pack'
+					});
+					if (selectedFile && selectedFile.length > 0) {
+						// Copy contents into curation content folder
+						const tempPath = fs.mkdtempSync(path.join(os.tmpdir(), 'unpack-data_'));
+						await flashpoint.unzipFile(selectedFile[0], tempPath);
+						const srcContents = path.join(tempPath, 'content');
+						const destContents = path.join(curationPath, 'content');
+						await fs.copy(srcContents, destContents);
+						await flashpoint.curations.refreshCurationContent(selected[0]);
+					}
+				}
+			} catch (err) { 
+				flashpoint.log.error(`Failed to unpack: ${err}`);
+			}
+		})
+	);
+
 	flashpoint.registerDisposable(
 		context.subscriptions, 
 		flashpoint.commands.registerCommand('core-curation.fix-requirements', async (curation: flashpoint.CurationState | null, selected: string[]) => {
