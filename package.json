@@ -8,6 +8,12 @@
     "contextButtons": [
       {
         "context": "curation",
+        "runWithNoCuration": true,
+        "name": "Clear WinINet Cache",
+        "command": "core-curation.clear-wininet-cache"
+      },
+      {
+        "context": "curation",
         "name": "Migrate to FP Navigator",
         "command": "core-curation.fix-requirements"
       },

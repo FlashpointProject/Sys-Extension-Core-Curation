@@ -2,6 +2,7 @@ import * as flashpoint from 'flashpoint-launcher';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as os from 'os';
+import * as child_process from 'child_process';
 
 const html5paths = [
 	'FPSoftware\\fpnavigator-portable\\FPNavigator.exe',
@@ -53,6 +54,17 @@ export function activate(context: flashpoint.ExtensionContext) {
 			} finally {
 				flashpoint.dialogs.cancelDialog(handle);
 			}
+		})
+	);
+
+	flashpoint.registerDisposable(
+		context.subscriptions,
+		flashpoint.commands.registerCommand('core-curation.clear-wininet-cache', () => {
+			child_process.exec('RunDll32.exe InetCpl.cpl,ClearMyTracksByProcess 8', (err) => {
+				if (err) {
+					flashpoint.log.error(`Error clearing WinINet Cache: ${err}`);
+				}
+			});
 		})
 	);
 
