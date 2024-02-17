@@ -112,7 +112,7 @@ export function activate(context: flashpoint.ExtensionContext) {
 						}
 						// Check platforms, add HTML5 if missing
 						if (html5paths.includes(curation.game.applicationPath || 'EMPTY')) {
-							const html5exists = curation.game.platforms?.find(p => p.primaryAlias.name === 'HTML5');
+							const html5exists = curation.game.platforms?.find(p => p.name === 'HTML5');
 							if (!html5exists) {
 								// Add HTML5 to platforms
 								const platforms = curation.game.platforms ? 
